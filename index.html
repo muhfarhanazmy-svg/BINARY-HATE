@@ -1,648 +1,152 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BINARY LAB — Simulasi Belajar Binari Ascii Operasi</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #030b0f;
-    --bg2: #071520;
-    --bg3: #0a1e2e;
-    --panel: #0d2236;
-    --panel2: #0f2a40;
-    --cyan: #00e5ff;
-    --cyan2: #00b8d4;
-    --cyan-dim: rgba(0,229,255,0.12);
-    --cyan-glow: 0 0 8px rgba(0,229,255,0.5), 0 0 20px rgba(0,229,255,0.2);
-    --green: #00ff9d;
-    --green-dim: rgba(0,255,157,0.1);
-    --amber: #ffa726;
-    --amber-dim: rgba(255,167,38,0.12);
-    --red: #ff4444;
-    --red-dim: rgba(255,68,68,0.12);
-    --text: #e0f4ff;
-    --text2: #7ab8d4;
-    --text3: #3d7a9a;
-    --border: rgba(0,229,255,0.15);
-    --border2: rgba(0,229,255,0.3);
-    --mono: 'Share Tech Mono', monospace;
-    --display: 'Orbitron', monospace;
-    --body: 'Rajdhani', sans-serif;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--body);
-    min-height: 100vh;
-    overflow-x: hidden;
-    cursor: crosshair;
-  }
-
-  /* MATRIX RAIN CANVAS */
-  #matrix-canvas {
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    opacity: 0.035; pointer-events: none; z-index: 0;
-  }
-
-  /* SCANLINE OVERLAY */
-  body::after {
-    content: '';
-    position: fixed; top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-    pointer-events: none; z-index: 999;
-  }
-
-  /* LAYOUT */
-  .app { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; }
-
-  /* HEADER */
-  .header {
-    padding: 40px 0 30px;
-    text-align: center;
-    position: relative;
-  }
-  .header::before {
-    content: '';
-    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-    width: 80%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-  }
-  .header-label {
-    font-family: var(--mono);
-    font-size: 11px; color: var(--cyan2); letter-spacing: 0.3em;
-    text-transform: uppercase; margin-bottom: 12px;
-    animation: blink-cursor 1.2s step-end infinite;
-  }
-  @keyframes blink-cursor { 50% { opacity: 0; } }
-  .header h1 {
-    font-family: var(--display);
-    font-size: clamp(28px, 6vw, 56px);
-    font-weight: 900;
-    color: var(--cyan);
-    text-shadow: var(--cyan-glow);
-    letter-spacing: 0.08em;
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-  .header h1 span { color: var(--green); text-shadow: 0 0 10px var(--green), 0 0 30px rgba(0,255,157,0.3); }
-  .header-sub {
-    font-family: var(--body);
-    font-size: 14px; font-weight: 300;
-    color: var(--text2); letter-spacing: 0.15em;
-  }
-  .status-bar {
-    display: flex; gap: 16px; justify-content: center;
-    margin-top: 16px; flex-wrap: wrap;
-  }
-  .status-pill {
-    font-family: var(--mono); font-size: 11px;
-    color: var(--cyan); border: 1px solid var(--border2);
-    padding: 4px 12px; border-radius: 2px;
-    background: var(--cyan-dim);
-  }
-  .status-pill.green { color: var(--green); border-color: rgba(0,255,157,0.3); background: var(--green-dim); }
-
-  /* NAV TABS */
-  .nav-tabs {
-    display: flex; gap: 4px; margin: 30px 0 24px;
-    flex-wrap: wrap;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0;
-  }
-  .tab-btn {
-    font-family: var(--mono); font-size: 12px; font-weight: 400;
-    color: var(--text3); background: transparent;
-    border: 1px solid transparent; border-bottom: none;
-    padding: 10px 20px; cursor: pointer;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    transition: all 0.2s; border-radius: 4px 4px 0 0;
-    position: relative; bottom: -1px;
-  }
-  .tab-btn:hover { color: var(--cyan2); border-color: var(--border); background: var(--bg2); }
-  .tab-btn.active {
-    color: var(--cyan); border-color: var(--border2);
-    border-bottom-color: var(--bg);
-    background: var(--bg);
-  }
-  .tab-btn .tab-num {
-    font-size: 9px; color: var(--text3);
-    margin-right: 6px;
-  }
-  .tab-btn.active .tab-num { color: var(--cyan2); }
-
-  /* PANELS */
-  .panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 0 4px 4px 4px;
-    padding: 28px;
-    position: relative;
-    overflow: hidden;
-  }
-  .panel::before {
-    content: '';
-    position: absolute; top: 0; left: 0;
-    width: 3px; height: 100%;
-    background: linear-gradient(180deg, var(--cyan), transparent);
-  }
-  .section { display: none; }
-  .section.active { display: block; }
-
-  /* SECTION TITLE */
-  .sec-title {
-    font-family: var(--display); font-size: 13px; font-weight: 700;
-    color: var(--cyan); letter-spacing: 0.2em; text-transform: uppercase;
-    margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
-  }
-  .sec-title::after {
-    content: ''; flex: 1; height: 1px;
-    background: linear-gradient(90deg, var(--border2), transparent);
-  }
-  .sec-desc {
-    font-size: 14px; font-weight: 300; color: var(--text2);
-    margin-bottom: 24px; line-height: 1.7; letter-spacing: 0.02em;
-  }
-
-  /* BIT DISPLAY — CORE COMPONENT */
-  .bit-container { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 16px 0; }
-  .bit-group { display: flex; gap: 4px; }
-  .bit-unit {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-  }
-  .bit-pow {
-    font-family: var(--mono); font-size: 10px; color: var(--text3);
-    letter-spacing: 0.05em;
-  }
-  .bit-val-label {
-    font-family: var(--mono); font-size: 10px; color: var(--text3);
-  }
-  .bit-btn {
-    width: 56px; height: 56px;
-    font-family: var(--mono); font-size: 24px; font-weight: 400;
-    background: var(--panel); color: var(--text3);
-    border: 1px solid var(--border);
-    border-radius: 4px; cursor: pointer;
-    transition: all 0.12s;
-    display: flex; align-items: center; justify-content: center;
-    user-select: none;
-    position: relative; overflow: hidden;
-  }
-  .bit-btn:hover { border-color: var(--border2); color: var(--text2); }
-  .bit-btn.on {
-    background: var(--cyan-dim);
-    border-color: var(--cyan);
-    color: var(--cyan);
-    box-shadow: 0 0 12px rgba(0,229,255,0.3), inset 0 0 12px rgba(0,229,255,0.05);
-    text-shadow: var(--cyan-glow);
-  }
-  .bit-btn.on::after {
-    content: '';
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 2px;
-    background: var(--cyan);
-    box-shadow: var(--cyan-glow);
-  }
-  .bit-btn:active { transform: scale(0.93); }
-  .bit-sep {
-    width: 1px; background: var(--border); margin: 0 4px; align-self: stretch;
-    margin-top: 28px;
-  }
-
-  /* RESULT DISPLAY */
-  .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 20px 0; }
-  .result-card {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 4px; padding: 14px 16px;
-    position: relative; overflow: hidden;
-  }
-  .result-card::before {
-    content: ''; position: absolute; top: 0; left: 0;
-    width: 100%; height: 1px; background: var(--cyan);
-    opacity: 0.4;
-  }
-  .result-label {
-    font-family: var(--mono); font-size: 10px; color: var(--text3);
-    letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px;
-  }
-  .result-value {
-    font-family: var(--mono); font-size: 22px; font-weight: 400;
-    color: var(--cyan); word-break: break-all;
-    line-height: 1.2;
-  }
-  .result-value.green { color: var(--green); text-shadow: 0 0 8px rgba(0,255,157,0.4); }
-  .result-value.amber { color: var(--amber); }
-  .result-value.sm { font-size: 14px; }
-
-  /* STEP BOX */
-  .step-box {
-    background: var(--panel); border: 1px solid var(--border);
-    border-left: 2px solid var(--cyan);
-    border-radius: 0 4px 4px 0;
-    padding: 14px 18px;
-    font-family: var(--mono); font-size: 13px; color: var(--text2);
-    line-height: 1.9; white-space: pre-wrap; word-break: break-all;
-    min-height: 50px; margin: 12px 0;
-  }
-  .step-box.green { border-left-color: var(--green); }
-  .step-box .hl { color: var(--cyan); font-weight: 400; }
-  .step-box .hl2 { color: var(--green); }
-  .step-box .hl3 { color: var(--amber); }
-
-  /* INPUT */
-  .input-row { display: flex; gap: 10px; align-items: stretch; margin: 12px 0; flex-wrap: wrap; }
-  .input-field {
-    flex: 1; min-width: 180px;
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 4px; padding: 12px 16px;
-    font-family: var(--mono); font-size: 18px; color: var(--cyan);
-    outline: none; transition: border-color 0.15s;
-    letter-spacing: 0.05em;
-  }
-  .input-field::placeholder { color: var(--text3); font-size: 14px; }
-  .input-field:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(0,229,255,0.1); }
-  .input-label {
-    font-family: var(--mono); font-size: 11px; color: var(--text3);
-    letter-spacing: 0.15em; text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .input-group { flex: 1; min-width: 160px; }
-
-  /* BUTTON */
-  .btn {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.15em;
-    text-transform: uppercase; color: var(--cyan);
-    background: var(--cyan-dim); border: 1px solid var(--border2);
-    padding: 12px 24px; border-radius: 4px; cursor: pointer;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .btn:hover { background: rgba(0,229,255,0.2); box-shadow: var(--cyan-glow); }
-  .btn:active { transform: scale(0.97); }
-  .btn.green { color: var(--green); background: var(--green-dim); border-color: rgba(0,255,157,0.3); }
-  .btn.green:hover { box-shadow: 0 0 12px rgba(0,255,157,0.3); }
-  .btn.amber { color: var(--amber); background: var(--amber-dim); border-color: rgba(255,167,38,0.3); }
-  .btn.red { color: var(--red); background: var(--red-dim); border-color: rgba(255,68,68,0.3); }
-  .btn.full { width: 100%; text-align: center; }
-  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
-
-  /* DIVIDER */
-  .divider {
-    height: 1px; background: linear-gradient(90deg, var(--border2), transparent);
-    margin: 28px 0;
-  }
-
-  /* GRID LAYOUT */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
-
-  /* OPERATION DISPLAY */
-  .op-display {
-    font-family: var(--mono); font-size: 18px; line-height: 2;
-    padding: 20px; background: var(--panel);
-    border: 1px solid var(--border); border-radius: 4px;
-    text-align: right; letter-spacing: 0.1em;
-  }
-  .op-row { display: flex; justify-content: space-between; align-items: center; }
-  .op-label-col { color: var(--text3); font-size: 13px; letter-spacing: 0.05em; text-align: left; min-width: 60px; }
-  .op-val { color: var(--text2); letter-spacing: 0.15em; }
-  .op-val .bit-1 { color: var(--cyan); text-shadow: 0 0 6px rgba(0,229,255,0.4); }
-  .op-val .bit-0 { color: var(--text3); }
-  .op-line { border-top: 1px solid var(--border2); margin: 8px 0; }
-  .op-result { color: var(--green); font-size: 20px; text-shadow: 0 0 8px rgba(0,255,157,0.3); }
-
-  /* OP SELECTOR */
-  .op-selector { display: flex; gap: 6px; margin: 12px 0; flex-wrap: wrap; }
-  .op-btn {
-    font-family: var(--mono); font-size: 13px; letter-spacing: 0.1em;
-    color: var(--text2); background: var(--panel);
-    border: 1px solid var(--border); padding: 8px 18px;
-    border-radius: 4px; cursor: pointer; transition: all 0.15s;
-  }
-  .op-btn:hover { border-color: var(--border2); color: var(--text); }
-  .op-btn.active {
-    color: var(--cyan); border-color: var(--cyan);
-    background: var(--cyan-dim);
-    box-shadow: 0 0 8px rgba(0,229,255,0.2);
-  }
-  .op-btn.green.active { color: var(--green); border-color: var(--green); background: var(--green-dim); }
-  .op-btn.amber.active { color: var(--amber); border-color: var(--amber); background: var(--amber-dim); }
-  .op-btn.red.active { color: var(--red); border-color: var(--red); background: var(--red-dim); }
-
-  /* TRUTH TABLE */
-  .truth-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 13px; }
-  .truth-table th {
-    color: var(--text3); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
-    padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: center;
-    font-weight: 400;
-  }
-  .truth-table td {
-    color: var(--text2); padding: 8px 14px; text-align: center;
-    border-bottom: 1px solid rgba(0,229,255,0.05); transition: background 0.1s;
-  }
-  .truth-table tr:hover td { background: var(--bg3); }
-  .truth-table .c1 { color: var(--cyan); }
-  .truth-table .g1 { color: var(--green); text-shadow: 0 0 6px rgba(0,255,157,0.3); }
-  .truth-table .r0 { color: var(--text3); }
-
-  /* ASCII TABLE */
-  .ascii-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px;
-    max-height: 360px; overflow-y: auto; padding: 4px;
-  }
-  .ascii-grid::-webkit-scrollbar { width: 4px; }
-  .ascii-grid::-webkit-scrollbar-track { background: var(--panel); }
-  .ascii-grid::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-  .ascii-cell {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 3px; padding: 8px 10px; cursor: pointer;
-    transition: all 0.1s;
-    display: flex; flex-direction: column; gap: 2px;
-  }
-  .ascii-cell:hover { border-color: var(--cyan); background: var(--cyan-dim); }
-  .ascii-cell.selected { border-color: var(--green); background: var(--green-dim); }
-  .ascii-char { font-family: var(--mono); font-size: 18px; color: var(--cyan); line-height: 1; }
-  .ascii-dec { font-family: var(--mono); font-size: 10px; color: var(--text3); }
-  .ascii-bin { font-family: var(--mono); font-size: 9px; color: var(--text2); word-break: break-all; }
-
-  /* TEXT TO BINARY */
-  .text-bin-output {
-    font-family: var(--mono); font-size: 12px; color: var(--text2);
-    background: var(--panel); border: 1px solid var(--border);
-    padding: 16px; border-radius: 4px;
-    line-height: 2.2; word-break: break-all; min-height: 80px;
-    max-height: 200px; overflow-y: auto;
-  }
-  .text-bin-char { color: var(--cyan); }
-  .text-bin-bits { color: var(--text2); }
-  .text-bin-sep { color: var(--text3); }
-
-  /* QUIZ */
-  .quiz-question {
-    font-family: var(--display); font-size: 14px; color: var(--text);
-    letter-spacing: 0.05em; line-height: 1.8;
-    margin-bottom: 20px; min-height: 60px;
-  }
-  .quiz-question .q-code {
-    color: var(--cyan); text-shadow: 0 0 6px rgba(0,229,255,0.3);
-    font-size: 28px; display: block; margin: 8px 0;
-    letter-spacing: 0.2em;
-  }
-  .quiz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  @media (max-width: 480px) { .quiz-opts { grid-template-columns: 1fr; } }
-  .quiz-opt {
-    background: var(--panel); border: 1px solid var(--border);
-    font-family: var(--mono); font-size: 16px; color: var(--text2);
-    padding: 14px 18px; border-radius: 4px; cursor: pointer;
-    text-align: center; letter-spacing: 0.1em;
-    transition: all 0.12s; position: relative; overflow: hidden;
-  }
-  .quiz-opt:hover { border-color: var(--border2); color: var(--text); background: var(--bg3); }
-  .quiz-opt.correct { border-color: var(--green); color: var(--green); background: var(--green-dim); box-shadow: 0 0 12px rgba(0,255,157,0.2); }
-  .quiz-opt.wrong { border-color: var(--red); color: var(--red); background: var(--red-dim); }
-  .quiz-opt.revealed { border-color: var(--green); color: var(--green); background: var(--green-dim); }
-
-  .quiz-feedback {
-    margin-top: 16px; padding: 12px 16px;
-    font-family: var(--mono); font-size: 13px; border-radius: 4px;
-    display: none; letter-spacing: 0.05em; line-height: 1.6;
-  }
-  .quiz-feedback.show { display: block; }
-  .quiz-feedback.ok { border: 1px solid rgba(0,255,157,0.3); color: var(--green); background: var(--green-dim); }
-  .quiz-feedback.no { border: 1px solid rgba(255,68,68,0.3); color: var(--red); background: var(--red-dim); }
-
-  /* SCORE */
-  .score-display {
-    display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
-    flex-wrap: wrap;
-  }
-  .score-nums { font-family: var(--mono); font-size: 13px; color: var(--text2); }
-  .score-nums .s-big { font-size: 28px; color: var(--cyan); font-weight: 400; }
-  .score-bar-outer { flex: 1; min-width: 100px; height: 4px; background: var(--panel); border-radius: 2px; }
-  .score-bar-inner { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); border-radius: 2px; transition: width 0.4s ease; }
-  .streak-badge {
-    font-family: var(--mono); font-size: 11px; color: var(--amber);
-    border: 1px solid rgba(255,167,38,0.3); background: var(--amber-dim);
-    padding: 4px 12px; border-radius: 2px; letter-spacing: 0.1em;
-  }
-
-  .level-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-  .lvl-btn {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
-    color: var(--text3); background: var(--panel); border: 1px solid var(--border);
-    padding: 6px 14px; border-radius: 2px; cursor: pointer; transition: all 0.15s;
-    text-transform: uppercase;
-  }
-  .lvl-btn:hover { color: var(--text2); border-color: var(--border2); }
-  .lvl-btn.active { color: var(--cyan); border-color: var(--cyan); background: var(--cyan-dim); }
-
-  /* PROGRESS RING */
-  .progress-ring-wrap { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
-  .ring-svg { flex-shrink: 0; }
-  .ring-track { fill: none; stroke: var(--panel); stroke-width: 6; }
-  .ring-fill { fill: none; stroke: var(--cyan); stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; transform-origin: center; transform: rotate(-90deg); }
-  .ring-center { font-family: var(--mono); font-size: 14px; fill: var(--cyan); text-anchor: middle; dominant-baseline: middle; }
-  .ring-sub { font-family: var(--mono); font-size: 9px; fill: var(--text3); text-anchor: middle; }
-
-  /* CHEATSHEET */
-  .cheat-table { width: 100%; border-collapse: collapse; }
-  .cheat-table th {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
-    color: var(--text3); padding: 10px 12px; border-bottom: 1px solid var(--border);
-    text-align: left; font-weight: 400;
-  }
-  .cheat-table td {
-    font-family: var(--mono); font-size: 13px; padding: 8px 12px;
-    border-bottom: 1px solid rgba(0,229,255,0.04); color: var(--text2);
-    transition: background 0.1s;
-  }
-  .cheat-table tr:hover td { background: var(--bg3); }
-  .cheat-table .td-dec { color: var(--amber); font-size: 14px; }
-  .cheat-table .td-bin { color: var(--cyan); letter-spacing: 0.1em; }
-  .cheat-table .td-hex { color: var(--green); }
-  .cheat-table .td-note { color: var(--text3); font-size: 11px; }
-
-  .pow-grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px;
-    margin: 16px 0;
-  }
-  .pow-card {
-    background: var(--panel); border: 1px solid var(--border); border-radius: 4px;
-    padding: 12px; text-align: center;
-  }
-  .pow-card .p-exp { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-  .pow-card .p-val { font-family: var(--mono); font-size: 17px; color: var(--cyan); font-weight: 400; }
-
-  /* TOAST */
-  .toast {
-    position: fixed; bottom: 30px; right: 30px; z-index: 1000;
-    font-family: var(--mono); font-size: 13px;
-    background: var(--panel); border: 1px solid var(--cyan);
-    color: var(--cyan); padding: 12px 20px; border-radius: 4px;
-    box-shadow: var(--cyan-glow); letter-spacing: 0.08em;
-    transform: translateY(100px); opacity: 0;
-    transition: all 0.3s ease; pointer-events: none;
-  }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.green { border-color: var(--green); color: var(--green); box-shadow: 0 0 12px rgba(0,255,157,0.3); }
-
-  /* ANIMATIONS */
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .section.active { animation: fadeIn 0.25s ease; }
-
-  @keyframes glitch {
-    0% { text-shadow: 0 0 8px rgba(0,229,255,0.5), 0 0 20px rgba(0,229,255,0.2); }
-    20% { text-shadow: -2px 0 rgba(255,68,68,0.7), 2px 0 rgba(0,229,255,0.7); }
-    40% { text-shadow: 0 0 8px rgba(0,229,255,0.5), 0 0 20px rgba(0,229,255,0.2); }
-    60% { text-shadow: 2px 0 rgba(0,255,157,0.7), -2px 0 rgba(0,229,255,0.7); }
-    80% { text-shadow: 0 0 8px rgba(0,229,255,0.5), 0 0 20px rgba(0,229,255,0.2); }
-  }
-  .header h1:hover { animation: glitch 0.5s ease; }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-  /* RESPONSIVE BITS */
-  @media (max-width: 600px) {
-    .bit-btn { width: 44px; height: 44px; font-size: 20px; }
-    .panel { padding: 18px; }
-  }
-  @media (max-width: 400px) {
-    .bit-btn { width: 36px; height: 36px; font-size: 18px; }
-  }
-
-  .info-block {
-    background: var(--panel); border: 1px solid var(--border);
-    border-left: 2px solid var(--amber); border-radius: 0 4px 4px 0;
-    padding: 12px 16px; margin: 12px 0;
-    font-size: 14px; color: var(--text2); line-height: 1.7;
-    font-weight: 300; letter-spacing: 0.02em;
-  }
-  .info-block strong { color: var(--amber); font-weight: 600; }
-  .info-block code { font-family: var(--mono); color: var(--cyan); font-size: 13px; }
-
-  .tag { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
-    color: var(--cyan2); border: 1px solid var(--border); padding: 2px 8px; border-radius: 2px;
-    background: var(--cyan-dim); margin: 2px; }
-  .tag.green { color: var(--green); border-color: rgba(0,255,157,0.2); background: var(--green-dim); }
-  .tag.amber { color: var(--amber); border-color: rgba(255,167,38,0.2); background: var(--amber-dim); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Lab — Perpustakaan Roh Hutan</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="matrix-canvas"></canvas>
+
+<!-- ===================== ANIMATED BACKGROUND ===================== -->
+<div class="scene-bg">
+  <div class="scene-sky"></div>
+  <div class="hill hill-1"></div>
+  <div class="hill hill-2"></div>
+  <div class="hill hill-3"></div>
+  <div id="spirits-bg"></div>
+</div>
 
 <div class="app">
+
+  <!-- ===================== HEADER ===================== -->
   <div class="header">
-    <div class="header-label">// SISTEM OPERASI BILANGAN //</div>
-    <h1>BINARY <span>LAB</span></h1>
-    <div class="header-sub">BINARY LEARNING ENVIRONMENT SUYY · v2.2.1</div>
-    <div class="status-bar">
-      <div class="status-pill green">SISTEM ONLINE</div>
-      <div class="status-pill">BASIS-2</div>
-      <div class="status-pill">8-BIT MODE</div>D
-      <div class="status-pill" id="session-score">SCORE: 0</div>
+    <p class="header-eyebrow">✦ Perpustakaan Digital Roh Hutan ✦</p>
+    <h1>Binary <em>Lab</em></h1>
+    <p class="header-sub">Pelajari kode biner bersama roh-roh hutan yang menyimpan rahasia angka</p>
+    <div class="header-pills">
+      <span class="pill green">Sistem Online</span>
+      <span class="pill">Basis-2</span>
+      <span class="pill">8-bit Mode</span>
+      <span class="pill" id="header-score">Jiwa terkumpul: 0</span>
     </div>
   </div>
 
+  <!-- ===================== NAV TABS ===================== -->
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="showTab('t1')"><span class="tab-num">01</span>KONVERTER</button>
-    <button class="tab-btn" onclick="showTab('t2')"><span class="tab-num">02</span>OPERASI</button>
-    <button class="tab-btn" onclick="showTab('t3')"><span class="tab-num">03</span>ASCII</button>
-    <button class="tab-btn" onclick="showTab('t4')"><span class="tab-num">04</span>KUIS</button>
-    <button class="tab-btn" onclick="showTab('t5')"><span class="tab-num">05</span>REFERENSI</button>
+    <button class="tab-btn active" onclick="showTab('t1')">
+      <span class="ch-num">Bab I</span>Konverter
+    </button>
+    <button class="tab-btn" onclick="showTab('t2')">
+      <span class="ch-num">Bab II</span>Operasi Bitwise
+    </button>
+    <button class="tab-btn" onclick="showTab('t3')">
+      <span class="ch-num">Bab III</span>Kuis
+    </button>
+    <button class="tab-btn" onclick="showTab('t4')">
+      <span class="ch-num">Bab IV</span>Referensi
+    </button>
   </div>
 
   <div class="panel">
 
-    <!-- TAB 1: KONVERTER -->
+    <!-- ===================== TAB 1: KONVERTER ===================== -->
     <div class="section active" id="t1">
-      <div class="sec-title">BIT SIMULATOR — Biner ↔ Desimal</div>
-      <div class="sec-desc">Klik bit buat toggle ON/OFF. Nilai terhitung real-time. Kamu bisa drag-klik buat toggle banyak bit sekaligus.</div>
+      <div class="sec-title"><span class="leaf">🌿</span> Simulator Roh Biner</div>
+      <div class="sec-desc">
+        Klik roh-roh di bawah untuk membangunkan (1) atau menidurkan (0) mereka.
+        Roh yang terjaga bersinar emas — nilai mereka dijumlahkan secara otomatis.
+        Coba drag-klik untuk toggle banyak roh sekaligus!
+      </div>
 
       <div id="bit-container" class="bit-container"></div>
 
-      <div class="result-grid" id="conv-results">
+      <div class="result-grid">
         <div class="result-card">
-          <div class="result-label">BINER</div>
+          <div class="result-label">Biner</div>
           <div class="result-value sm" id="r-bin">00000000</div>
         </div>
         <div class="result-card">
-          <div class="result-label">DESIMAL</div>
+          <div class="result-label">Desimal</div>
           <div class="result-value" id="r-dec">0</div>
         </div>
         <div class="result-card">
-          <div class="result-label">HEKSADESIMAL</div>
-          <div class="result-value green" id="r-hex">0x00</div>
+          <div class="result-label">Heksadesimal</div>
+          <div class="result-value sky" id="r-hex">0x00</div>
         </div>
         <div class="result-card">
-          <div class="result-label">OCTAL</div>
-          <div class="result-value amber" id="r-oct">0o000</div>
+          <div class="result-label">Oktal</div>
+          <div class="result-value earth" id="r-oct">0o000</div>
         </div>
       </div>
 
-      <div class="step-box" id="r-step">Tap bit di atas untuk mulai — setiap bit yang aktif (ON) nilainya ditambahkan ke total.</div>
+      <div class="scroll-box" id="r-step">
+        Bangunkan roh-roh di atas untuk melihat nilai mereka bergabung...
+      </div>
 
       <div class="btn-row">
-        <button class="btn" onclick="resetBits()">RESET SEMUA</button>
-        <button class="btn green" onclick="randomBits()">RANDOM</button>
-        <button class="btn amber" onclick="setBitsFromVal(255)">SET ALL 1</button>
+        <button class="btn"       onclick="resetBits()">Tidurkan Semua</button>
+        <button class="btn sky"   onclick="randomBits()">Acak Roh</button>
+        <button class="btn earth" onclick="setBitsFromVal(255)">Bangunkan Semua</button>
       </div>
 
       <div class="divider"></div>
 
-      <div class="sec-title">KONVERTER ANGKA — Desimal ke Biner</div>
-      <div class="sec-desc">Ketik angka desimal (0–255), lihat proses konversi metode bagi-2 step by step.</div>
+      <div class="sec-title"><span class="leaf">🌾</span> Konverter Angka</div>
+      <div class="sec-desc">
+        Ketik angka desimal (0–255) untuk melihat konversi step-by-step, atau ketik biner langsung.
+      </div>
 
       <div class="input-row">
         <div class="input-group">
-          <div class="input-label">INPUT DESIMAL</div>
-          <input type="number" class="input-field" id="d2b-input" min="0" max="255" placeholder="contoh: 42" oninput="d2bConvert()">
+          <div class="input-label">Masukkan Desimal</div>
+          <input type="number" class="input-field" id="d2b-input"
+            min="0" max="255" placeholder="contoh: 42" oninput="d2bConvert()">
         </div>
         <div class="input-group">
-          <div class="input-label">ATAU INPUT BINER</div>
-          <input type="text" class="input-field" id="b2d-input" placeholder="contoh: 101010" oninput="b2dConvert()" maxlength="8">
+          <div class="input-label">Atau Masukkan Biner</div>
+          <input type="text" class="input-field" id="b2d-input"
+            placeholder="contoh: 101010" oninput="b2dConvert()" maxlength="8">
         </div>
       </div>
 
       <div class="result-grid" id="conv2-results" style="display:none"></div>
-      <div class="step-box green" id="d2b-steps">Ketik angka di atas untuk melihat langkah-langkah konversi...</div>
+      <div class="scroll-box sky" id="d2b-steps">Ketik angka di atas untuk melihat langkah-langkah konversi...</div>
     </div>
 
-    <!-- TAB 2: OPERASI BINER -->
+    <!-- ===================== TAB 2: OPERASI BITWISE ===================== -->
     <div class="section" id="t2">
-      <div class="sec-title">OPERASI BITWISE</div>
-      <div class="sec-desc">Pelajari AND, OR, XOR, NOT, dan Bit Shift — operasi fundamental yang dipakai CPU setiap detik.</div>
-
-      <div class="op-selector" id="op-selector">
-        <button class="op-btn active" onclick="setOp('AND')">AND</button>
-        <button class="op-btn green" onclick="setOp('OR')">OR</button>
-        <button class="op-btn amber" onclick="setOp('XOR')">XOR</button>
-        <button class="op-btn red" onclick="setOp('NOT')">NOT</button>
-        <button class="op-btn" onclick="setOp('SHL')">SHIFT ←</button>
-        <button class="op-btn" onclick="setOp('SHR')">SHIFT →</button>
+      <div class="sec-title"><span class="leaf">⚡</span> Operasi Bitwise</div>
+      <div class="sec-desc">
+        Operasi fundamental yang dipakai CPU setiap milidetik. Pelajari cara roh-roh biner
+        berinteraksi satu sama lain.
       </div>
 
-      <div class="info-block" id="op-info">
-        <strong>AND</strong> — Output = 1 hanya jika <strong>kedua</strong> input = 1. Dipakai untuk masking bit. Contoh: <code>1100 AND 1010 = 1000</code>
+      <div class="op-selector">
+        <button class="op-btn active"  onclick="setOp('AND')">AND</button>
+        <button class="op-btn sky"     onclick="setOp('OR')">OR</button>
+        <button class="op-btn earth"   onclick="setOp('XOR')">XOR</button>
+        <button class="op-btn red"     onclick="setOp('NOT')">NOT</button>
+        <button class="op-btn"         onclick="setOp('SHL')">Shift ←</button>
+        <button class="op-btn"         onclick="setOp('SHR')">Shift →</button>
+      </div>
+
+      <div class="lore-block" id="op-info">
+        <strong>AND</strong> — Output 1 hanya jika <strong>kedua</strong> bit = 1.
+        Dipakai untuk masking bit. Contoh: <code>1100 AND 1010 = 1000</code>
       </div>
 
       <div class="two-col">
         <div>
-          <div id="op-inputs">
-            <div style="margin-bottom:16px">
-              <div class="input-label">INPUT A</div>
-              <input type="text" class="input-field" id="op-a" placeholder="00001111" maxlength="8" oninput="calcOp()" value="11001010">
-            </div>
-            <div id="op-b-wrap">
-              <div class="input-label">INPUT B</div>
-              <input type="text" class="input-field" id="op-b" placeholder="11110000" maxlength="8" oninput="calcOp()" value="10110011">
-            </div>
+          <div style="margin-bottom:16px">
+            <div class="input-label">Input A</div>
+            <input type="text" class="input-field" id="op-a"
+              placeholder="00001111" maxlength="8" oninput="calcOp()" value="11001010">
+          </div>
+          <div id="op-b-wrap">
+            <div class="input-label">Input B</div>
+            <input type="text" class="input-field" id="op-b"
+              placeholder="11110000" maxlength="8" oninput="calcOp()" value="10110011">
           </div>
         </div>
         <div>
@@ -650,625 +154,124 @@
         </div>
       </div>
 
-      <div class="step-box" id="op-explain"></div>
+      <div class="scroll-box" id="op-explain"></div>
 
       <div class="divider"></div>
 
-      <div class="sec-title">TABEL KEBENARAN</div>
+      <div class="sec-title"><span class="leaf">📜</span> Tabel Kebenaran</div>
       <div id="truth-wrap"></div>
     </div>
 
-    <!-- TAB 3: ASCII -->
+    <!-- ===================== TAB 3: KUIS ===================== -->
     <div class="section" id="t3">
-      <div class="sec-title">ASCII ENCODER</div>
-      <div class="sec-desc">Setiap karakter teks punya kode biner tersendiri. Begini cara teks kamu disimpan di komputer.</div>
-
-      <div class="input-row">
-        <div class="input-group" style="flex:2">
-          <div class="input-label">KETIK TEKS</div>
-          <input type="text" class="input-field" id="ascii-input" placeholder="Halo Dunia" oninput="encodeText()" value="Halo">
-        </div>
-        <button class="btn" onclick="copyBinText()" style="align-self:flex-end">COPY BIN</button>
+      <div class="sec-title"><span class="leaf">🌟</span> Tantangan Roh</div>
+      <div class="sec-desc">
+        Kumpulkan jiwa dengan menjawab pertanyaan dengan benar.
+        Jaga streak-mu agar kekuatan roh tetap membara!
       </div>
 
-      <div class="input-label" style="margin-top:16px">HASIL ENCODING</div>
-      <div class="text-bin-output" id="bin-text-output">—</div>
-
-      <div class="result-grid" id="ascii-stats" style="margin-top:12px">
-        <div class="result-card">
-          <div class="result-label">TOTAL KARAKTER</div>
-          <div class="result-value" id="asc-chars">0</div>
-        </div>
-        <div class="result-card">
-          <div class="result-label">TOTAL BYTE</div>
-          <div class="result-value green" id="asc-bytes">0</div>
-        </div>
-        <div class="result-card">
-          <div class="result-label">TOTAL BIT</div>
-          <div class="result-value amber" id="asc-bits">0</div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="sec-title">TABEL ASCII PRINTABLE</div>
-      <div class="sec-desc">Klik karakter untuk load ke simulator bit di tab Konverter.</div>
-      <div class="ascii-grid" id="ascii-table"></div>
-    </div>
-
-    <!-- TAB 4: KUIS -->
-    <div class="section" id="t4">
-      <div class="sec-title">BINARY CHALLENGE</div>
-
-      <div class="progress-ring-wrap">
-        <svg class="ring-svg" width="80" height="80" viewBox="0 0 80 80">
+      <!-- Score panel -->
+      <div class="score-wrap">
+        <svg class="score-ring" width="80" height="80" viewBox="0 0 80 80">
           <circle class="ring-track" cx="40" cy="40" r="33"/>
-          <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="33" stroke-dasharray="207.3" stroke-dashoffset="207.3"/>
+          <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="33"
+            stroke-dasharray="207.3" stroke-dashoffset="207.3"/>
           <text class="ring-center" x="40" y="37" id="ring-pct">0%</text>
-          <text class="ring-sub" x="40" y="52">akurasi</text>
+          <text class="ring-sub"    x="40" y="52">akurasi</text>
         </svg>
-        <div class="score-display" style="flex:1; margin:0;">
-          <div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:10px; justify-content:center;">
+          <div style="display:flex; align-items:baseline; gap:6px;">
             <div class="score-nums"><span class="s-big" id="q-score">0</span> / <span id="q-total">0</span></div>
-            <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:0.1em">BENAR / TOTAL</div>
+            <div style="font-family:var(--body);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase">benar / total</div>
           </div>
-          <div style="flex:1; min-width:80px;">
-            <div class="score-bar-outer"><div class="score-bar-inner" id="score-bar" style="width:0%"></div></div>
-          </div>
-          <div class="streak-badge" id="streak-badge">🔥 STREAK: 0</div>
+          <div class="score-bar-outer"><div class="score-bar-inner" id="score-bar" style="width:0%"></div></div>
+          <div class="streak-badge" id="streak-badge">✦ Streak: 0</div>
         </div>
       </div>
 
-      <div style="display:flex; gap:12px; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
-        <div style="font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em">LEVEL:</div>
-        <div class="level-btns">
-          <button class="lvl-btn active" id="lvl-easy" onclick="setQuizLevel('easy')">MUDAH (0–15)</button>
-          <button class="lvl-btn" id="lvl-med" onclick="setQuizLevel('med')">SEDANG (0–63)</button>
-          <button class="lvl-btn" id="lvl-hard" onclick="setQuizLevel('hard')">SUSAH (0–255)</button>
+      <!-- Level & Mode -->
+      <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:22px; flex-wrap:wrap;">
+        <div>
+          <div class="input-label" style="margin-bottom:8px">Level kesulitan</div>
+          <div class="level-btns">
+            <button class="lvl-btn active" id="lvl-easy" onclick="setQuizLevel('easy')">Mudah (0–15)</button>
+            <button class="lvl-btn"        id="lvl-med"  onclick="setQuizLevel('med')">Sedang (0–63)</button>
+            <button class="lvl-btn"        id="lvl-hard" onclick="setQuizLevel('hard')">Susah (0–255)</button>
+          </div>
         </div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.1em">MODE:</div>
-        <div class="level-btns">
-          <button class="lvl-btn active" id="mode-b2d" onclick="setQuizMode('b2d')">BIN→DEC</button>
-          <button class="lvl-btn" id="mode-d2b" onclick="setQuizMode('d2b')">DEC→BIN</button>
-          <button class="lvl-btn" id="mode-mix" onclick="setQuizMode('mix')">MIX</button>
+        <div>
+          <div class="input-label" style="margin-bottom:8px">Mode soal</div>
+          <div class="level-btns">
+            <button class="lvl-btn active" id="mode-b2d" onclick="setQuizMode('b2d')">Bin → Dec</button>
+            <button class="lvl-btn"        id="mode-d2b" onclick="setQuizMode('d2b')">Dec → Bin</button>
+            <button class="lvl-btn"        id="mode-mix" onclick="setQuizMode('mix')">Campur</button>
+          </div>
         </div>
       </div>
 
-      <div class="quiz-question" id="quiz-q"></div>
+      <!-- Question -->
+      <div class="quiz-q-card">
+        <div class="quiz-label" id="quiz-label">✦ Baca Roh Biner</div>
+        <div class="quiz-question-text" id="quiz-q"></div>
+      </div>
+
       <div class="quiz-opts" id="quiz-opts"></div>
       <div class="quiz-feedback" id="quiz-fb"></div>
+
       <div class="btn-row" style="margin-top:16px">
-        <button class="btn green" id="next-q-btn" onclick="nextQuestion()" style="display:none">SOAL BERIKUTNYA →</button>
-        <button class="btn amber" onclick="resetQuiz()">RESET SKOR</button>
+        <button class="btn sky" id="next-q-btn" onclick="nextQuestion()" style="display:none">
+          Soal Berikutnya →
+        </button>
+        <button class="btn earth" onclick="resetQuiz()">Mulai Ulang</button>
       </div>
     </div>
 
-    <!-- TAB 5: REFERENSI -->
-    <div class="section" id="t5">
-      <div class="sec-title">PANGKAT DUA PENTING</div>
+    <!-- ===================== TAB 4: REFERENSI ===================== -->
+    <div class="section" id="t4">
+      <div class="sec-title"><span class="leaf">📖</span> Pangkat Dua Penting</div>
       <div class="pow-grid" id="pow-grid"></div>
 
       <div class="divider"></div>
 
-      <div class="sec-title">TABEL REFERENSI 0–31</div>
-      <div style="overflow-x:auto">
+      <div class="sec-title"><span class="leaf">📋</span> Tabel Referensi 0–31</div>
+      <div style="overflow-x:auto; margin-bottom:24px;">
         <table class="cheat-table" id="cheat-table"></table>
       </div>
 
       <div class="divider"></div>
 
-      <div class="sec-title">TIPS CEPAT</div>
-      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
-        <span class="tag green">bit terakhir 1 = ganjil</span>
-        <span class="tag green">bit terakhir 0 = genap</span>
-        <span class="tag">SHL ×2</span>
-        <span class="tag">SHR ÷2</span>
-        <span class="tag amber">4 bit = 1 nibble</span>
-        <span class="tag amber">8 bit = 1 byte</span>
-        <span class="tag">NOT = flip semua bit</span>
-        <span class="tag green">0xFF = 255</span>
+      <div class="sec-title"><span class="leaf">✨</span> Tips Cepat Hutan</div>
+      <div style="margin-bottom:16px; display:flex; flex-wrap:wrap; gap:6px;">
+        <span class="tip-tag green">bit terakhir 1 = ganjil</span>
+        <span class="tip-tag green">bit terakhir 0 = genap</span>
+        <span class="tip-tag sky">SHL = ×2</span>
+        <span class="tip-tag sky">SHR = ÷2</span>
+        <span class="tip-tag earth">4 bit = 1 nibble</span>
+        <span class="tip-tag earth">8 bit = 1 byte</span>
+        <span class="tip-tag green">NOT = flip semua bit</span>
+        <span class="tip-tag sky">0xFF = 255</span>
       </div>
 
-      <div class="info-block">
-        <strong>TRICK HAFAL CEPAT:</strong> Pangkat 2 itu angkanya selalu diawali 1 dan diikuti 0: <code>1, 10, 100, 1000, 10000...</code>  
-        Makanya gampang: jumlah digit biner = eksponen + 1.
+      <div class="lore-block">
+        <strong>Hafalan Cepat:</strong> Pangkat 2 selalu dimulai dengan 1 dan diikuti 0-0-0…
+        Jadi <code>2⁵</code> = <code>100000</code>. Jumlah digit biner = eksponen + 1. Mudah kan?
       </div>
-      <div class="info-block">
-        <strong>SIGN BIT:</strong> Dalam sistem <em>signed</em> (bilangan negatif), bit paling kiri = tanda. <code>0</code> = positif, <code>1</code> = negatif. Contoh: <code>10000001</code> = -127 (dalam two's complement).
+      <div class="lore-block">
+        <strong>Sign Bit:</strong> Bit paling kiri jadi tanda dalam sistem <em>signed</em>.
+        <code>0</code> = positif, <code>1</code> = negatif.
+        Contoh: <code>10000001</code> = -127 (two's complement).
       </div>
-      <div class="info-block">
-        <strong>TWO'S COMPLEMENT:</strong> Cara komputer simpan angka negatif. Flip semua bit (NOT) lalu tambah 1. Contoh: <code>-5</code> = NOT(00000101) + 1 = 11111010 + 1 = <code>11111011</code>
+      <div class="lore-block">
+        <strong>Two's Complement:</strong> Cara komputer simpan negatif.
+        Flip semua bit (NOT) lalu tambah 1.
+        Contoh: <code>-5</code> = NOT(<code>00000101</code>) + 1 = <code>11111011</code>
       </div>
     </div>
 
-  </div><!-- end panel -->
-</div><!-- end app -->
+  </div><!-- end .panel -->
+</div><!-- end .app -->
 
 <div class="toast" id="toast"></div>
-
-<script>
-// ==============================
-// MATRIX RAIN
-// ==============================
-(function(){
-  const c = document.getElementById('matrix-canvas');
-  const ctx = c.getContext('2d');
-  let cols, drops;
-  function init(){
-    c.width = window.innerWidth;
-    c.height = window.innerHeight;
-    cols = Math.floor(c.width / 20);
-    drops = Array(cols).fill(1);
-  }
-  function draw(){
-    ctx.fillStyle = 'rgba(3,11,15,0.05)';
-    ctx.fillRect(0,0,c.width,c.height);
-    ctx.fillStyle = '#00e5ff';
-    ctx.font = '14px Share Tech Mono';
-    drops.forEach((y,i)=>{
-      const txt = Math.random() > 0.5 ? '1' : '0';
-      ctx.fillText(txt, i*20, y*20);
-      if(y*20 > c.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
-    });
-  }
-  init();
-  setInterval(draw, 60);
-  window.addEventListener('resize', init);
-})();
-
-// ==============================
-// GLOBAL STATE
-// ==============================
-let bits = [0,0,0,0,0,0,0,0];
-const pows = [128,64,32,16,8,4,2,1];
-let quizLevel = 'easy', quizMode = 'b2d';
-let qScore = 0, qTotal = 0, qStreak = 0, qAnswered = false;
-let currentOp = 'AND';
-
-// ==============================
-// TAB SYSTEM
-// ==============================
-function showTab(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  const tabs = ['t1','t2','t3','t4','t5'];
-  const idx = tabs.indexOf(id);
-  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-}
-
-// ==============================
-// BIT SIMULATOR
-// ==============================
-function initBitSim(){
-  const cont = document.getElementById('bit-container');
-  cont.innerHTML = '';
-  pows.forEach((p,i)=>{
-    if(i===4){
-      const sep = document.createElement('div');
-      sep.className = 'bit-sep'; cont.appendChild(sep);
-    }
-    const unit = document.createElement('div'); unit.className = 'bit-unit';
-    const expText = 7-i;
-    unit.innerHTML = `
-      <div class="bit-pow">2<sup>${expText}</sup></div>
-      <button class="bit-btn" id="b${i}" onclick="toggleBit(${i})" onmouseenter="dragToggle(${i})" >0</button>
-      <div class="bit-val-label">${p}</div>`;
-    cont.appendChild(unit);
-  });
-  updateBitDisplay();
-}
-
-let isDragging = false;
-document.addEventListener('mousedown',()=>isDragging=false);
-document.addEventListener('mouseup',()=>isDragging=false);
-function dragToggle(i){
-  if(isDragging){ toggleBit(i); }
-}
-document.getElementById('bit-container')?.addEventListener('mousedown', e=>{
-  if(e.target.classList.contains('bit-btn')){
-    isDragging = true;
-    const i = parseInt(e.target.id.replace('b',''));
-    toggleBit(i);
-    e.preventDefault();
-  }
-});
-
-function toggleBit(i){
-  bits[i] = bits[i]?0:1;
-  const btn = document.getElementById('b'+i);
-  btn.textContent = bits[i];
-  btn.className = 'bit-btn' + (bits[i]?' on':'');
-  updateBitDisplay();
-}
-
-function updateBitDisplay(){
-  const dec = bits.reduce((s,b,i)=>s+b*pows[i],0);
-  const binStr = bits.join('');
-  document.getElementById('r-bin').textContent = binStr;
-  document.getElementById('r-dec').textContent = dec;
-  document.getElementById('r-hex').textContent = '0x'+dec.toString(16).toUpperCase().padStart(2,'0');
-  document.getElementById('r-oct').textContent = '0o'+dec.toString(8).padStart(3,'0');
-  const active = bits.map((b,i)=>b?pows[i]:null).filter(v=>v!==null);
-  if(active.length===0){
-    document.getElementById('r-step').innerHTML = 'Semua bit OFF → nilai = <span class="hl">0</span>';
-  } else {
-    const expr = active.join(' + ');
-    document.getElementById('r-step').innerHTML =
-      `<span class="hl">${active.join('</span> + <span class="hl">')}</span> = <span class="hl2">${dec}</span>\n\nBiner: ${binStr} | Desimal: ${dec} | Hex: 0x${dec.toString(16).toUpperCase()}`;
-  }
-}
-
-function setBitsFromVal(n){
-  n = Math.max(0,Math.min(255,n));
-  const binStr = n.toString(2).padStart(8,'0');
-  bits = binStr.split('').map(Number);
-  bits.forEach((b,i)=>{
-    const btn=document.getElementById('b'+i);
-    if(btn){ btn.textContent=b; btn.className='bit-btn'+(b?' on':''); }
-  });
-  updateBitDisplay();
-}
-
-function resetBits(){ setBitsFromVal(0); showToast('RESET — semua bit OFF'); }
-function randomBits(){ setBitsFromVal(Math.floor(Math.random()*256)); showToast('RANDOM bits generated!'); }
-
-// ==============================
-// DEC ↔ BIN CONVERTER
-// ==============================
-function d2bConvert(){
-  const raw = document.getElementById('d2b-input').value;
-  const n = parseInt(raw);
-  if(raw===''||isNaN(n)||n<0||n>255){
-    document.getElementById('d2b-steps').innerHTML = 'Masukkan angka desimal antara 0 dan 255.';
-    document.getElementById('conv2-results').style.display='none'; return;
-  }
-  document.getElementById('b2d-input').value='';
-  const binStr = n.toString(2);
-  const padded = binStr.padStart(8,'0');
-  let steps = `<span class="hl">Metode Pembagian 2 (Baca sisa dari bawah ke atas):</span>\n\n`;
-  let cur=n, rems=[];
-  if(n===0){ steps += '0 ÷ 2 = 0 sisa <span class="hl">0</span>'; }
-  else {
-    while(cur>0){
-      const rem=cur%2, q=Math.floor(cur/2);
-      steps += `${cur} ÷ 2 = ${q} sisa <span class="hl">${rem}</span>\n`;
-      rems.unshift(rem); cur=q;
-    }
-    steps += `\n→ Baca sisa dari bawah: <span class="hl2">${rems.join('')}</span>\n`;
-    steps += `→ Pad 8-bit: <span class="hl3">${padded}</span> = <span class="hl2">${n}</span>`;
-  }
-  document.getElementById('d2b-steps').innerHTML = steps;
-  const r = document.getElementById('conv2-results');
-  r.style.display='grid';
-  r.innerHTML = `
-    <div class="result-card"><div class="result-label">BINER</div><div class="result-value sm">${padded}</div></div>
-    <div class="result-card"><div class="result-label">DESIMAL</div><div class="result-value">${n}</div></div>
-    <div class="result-card"><div class="result-label">HEX</div><div class="result-value green">0x${n.toString(16).toUpperCase().padStart(2,'0')}</div></div>
-    <div class="result-card"><div class="result-label">OCTAL</div><div class="result-value amber">0o${n.toString(8).padStart(3,'0')}</div></div>
-  `;
-  setBitsFromVal(n);
-}
-
-function b2dConvert(){
-  const raw = document.getElementById('b2d-input').value.trim();
-  if(!/^[01]+$/.test(raw)){
-    document.getElementById('d2b-steps').innerHTML = 'Hanya karakter 0 dan 1 yang valid.';
-    document.getElementById('conv2-results').style.display='none'; return;
-  }
-  document.getElementById('d2b-input').value='';
-  const n = parseInt(raw,2);
-  const padded = raw.padStart(8,'0');
-  let steps = `<span class="hl">Metode Nilai Tempat (Pangkat 2):</span>\n\n`;
-  const bits8 = padded.slice(-8).split('');
-  const powsLocal = [128,64,32,16,8,4,2,1];
-  let parts=[], sum=0;
-  bits8.forEach((b,i)=>{ if(b==='1'){ parts.push(`<span class="hl">${powsLocal[i]}</span>`); sum+=powsLocal[i]; }});
-  if(parts.length===0) steps += 'Semua bit 0 → nilai = <span class="hl">0</span>';
-  else {
-    steps += `Bit aktif: ${parts.join(' + ')}\n= <span class="hl2">${sum}</span>`;
-  }
-  document.getElementById('d2b-steps').innerHTML = steps;
-  const r = document.getElementById('conv2-results');
-  r.style.display='grid';
-  r.innerHTML = `
-    <div class="result-card"><div class="result-label">BINER INPUT</div><div class="result-value sm">${padded}</div></div>
-    <div class="result-card"><div class="result-label">DESIMAL</div><div class="result-value">${n}</div></div>
-    <div class="result-card"><div class="result-label">HEX</div><div class="result-value green">0x${n.toString(16).toUpperCase().padStart(2,'0')}</div></div>
-    <div class="result-card"><div class="result-label">OCTAL</div><div class="result-value amber">0o${n.toString(8)}</div></div>
-  `;
-  setBitsFromVal(n);
-}
-
-// ==============================
-// BITWISE OPERATIONS
-// ==============================
-const opInfos = {
-  AND: '<strong>AND</strong> — Output 1 hanya jika <strong>kedua</strong> input = 1. Dipakai untuk bit masking. Contoh: <code>1100 AND 1010 = 1000</code>',
-  OR:  '<strong>OR</strong> — Output 1 jika <strong>salah satu atau kedua</strong> input = 1. Dipakai untuk set bit. Contoh: <code>1100 OR 1010 = 1110</code>',
-  XOR: '<strong>XOR</strong> (Exclusive OR) — Output 1 jika input <strong>berbeda</strong>. Dipakai untuk toggle bit & enkripsi. Contoh: <code>1100 XOR 1010 = 0110</code>',
-  NOT: '<strong>NOT</strong> — Flip <strong>semua bit</strong> (bitwise complement). Cuma butuh 1 input. Contoh: <code>NOT 10110011 = 01001100</code>',
-  SHL: '<strong>SHIFT LEFT (SHL / &lt;&lt;)</strong> — Geser bit ke kiri, isi kanan dengan 0. Efeknya = kalikan dengan 2. Contoh: <code>00000101 &lt;&lt; 1 = 00001010</code> (5 × 2 = 10)',
-  SHR: '<strong>SHIFT RIGHT (SHR / &gt;&gt;)</strong> — Geser bit ke kanan, buang bit terakhir. Efeknya = bagi dengan 2. Contoh: <code>00001010 &gt;&gt; 1 = 00000101</code> (10 ÷ 2 = 5)'
-};
-
-function setOp(op){
-  currentOp = op;
-  document.querySelectorAll('.op-btn').forEach(b=>b.classList.remove('active'));
-  const idx = ['AND','OR','XOR','NOT','SHL','SHR'].indexOf(op);
-  document.querySelectorAll('.op-btn')[idx].classList.add('active');
-  document.getElementById('op-info').innerHTML = opInfos[op];
-  const bWrap = document.getElementById('op-b-wrap');
-  bWrap.style.display = (op==='NOT'||op==='SHL'||op==='SHR') ? 'none' : 'block';
-  calcOp(); renderTruthTable();
-}
-
-function validateBin(s){ return /^[01]{1,8}$/.test(s); }
-
-function calcOp(){
-  const aRaw = document.getElementById('op-a').value.trim() || '00000000';
-  const bRaw = document.getElementById('op-b').value.trim() || '00000000';
-  if(!validateBin(aRaw)){ document.getElementById('op-display').innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:13px">Input A harus biner 1-8 bit</div>'; return; }
-  if((currentOp==='AND'||currentOp==='OR'||currentOp==='XOR') && !validateBin(bRaw)){
-    document.getElementById('op-display').innerHTML='<div style="color:var(--red);font-family:var(--mono);font-size:13px">Input B harus biner 1-8 bit</div>'; return;
-  }
-  const a = parseInt(aRaw,2), b = parseInt(bRaw,2);
-  const aPad = aRaw.padStart(8,'0'), bPad = bRaw.padStart(8,'0');
-  let result, resultBin, opSym;
-  switch(currentOp){
-    case 'AND': result=a&b; opSym='AND'; break;
-    case 'OR':  result=a|b; opSym='OR'; break;
-    case 'XOR': result=a^b; opSym='XOR'; break;
-    case 'NOT': result=(~a)&0xFF; opSym='NOT'; break;
-    case 'SHL': result=(a<<1)&0xFF; opSym='SHL'; break;
-    case 'SHR': result=(a>>1)&0xFF; opSym='SHR'; break;
-  }
-  resultBin = result.toString(2).padStart(8,'0');
-
-  function colorBin(s){ return s.split('').map(b=>b==='1'?`<span class="bit-1">${b}</span>`:`<span class="bit-0">${b}</span>`).join(' '); }
-
-  let html = `<div class="op-row"><span class="op-label-col" style="font-size:12px">A</span><span class="op-val">${colorBin(aPad)}</span></div>`;
-  if(currentOp==='AND'||currentOp==='OR'||currentOp==='XOR'){
-    html += `<div class="op-row"><span class="op-label-col" style="font-size:12px">B</span><span class="op-val">${colorBin(bPad)}</span></div>`;
-  }
-  html += `<div class="op-row"><span class="op-label-col" style="font-size:10px;color:var(--text3)">${opSym}</span><div class="op-line" style="flex:1"></div></div>`;
-  html += `<div class="op-row"><span class="op-label-col" style="font-size:12px">=</span><span class="op-result">${colorBin(resultBin)}</span></div>`;
-  html += `<div class="op-row" style="margin-top:12px"><span class="op-label-col" style="font-size:10px;color:var(--text3)">DEC</span><span style="font-family:var(--mono);font-size:13px;color:var(--text2)">${a} ${opSym} ${currentOp==='NOT'||currentOp==='SHL'||currentOp==='SHR'?'':b} = <span style="color:var(--green)">${result}</span></span></div>`;
-  document.getElementById('op-display').innerHTML = html;
-
-  let explain = '';
-  if(currentOp==='AND') explain = `Setiap posisi bit: 1 AND 1 = 1, semua kombinasi lain = 0\nA: ${aPad}\nB: ${bPad}\n= ${resultBin} (${result})`;
-  else if(currentOp==='OR') explain = `Setiap posisi bit: 0 OR 0 = 0, semua kombinasi lain = 1\nA: ${aPad}\nB: ${bPad}\n= ${resultBin} (${result})`;
-  else if(currentOp==='XOR') explain = `Setiap posisi bit: sama = 0, beda = 1\nA: ${aPad}\nB: ${bPad}\n= ${resultBin} (${result})`;
-  else if(currentOp==='NOT') explain = `Flip semua bit: setiap 0 → 1, setiap 1 → 0\nA:   ${aPad}\nNOT: ${resultBin} (${result})`;
-  else if(currentOp==='SHL') explain = `Geser semua bit 1 posisi ke kiri, isi kanan dengan 0\nA:   ${aPad} (${a})\nSHL: ${resultBin} (${result}) = ${a} × 2 = ${a*2}${result!==a*2?' (overflow!)':''}`;
-  else if(currentOp==='SHR') explain = `Geser semua bit 1 posisi ke kanan, buang bit paling kanan\nA:   ${aPad} (${a})\nSHR: ${resultBin} (${result}) = floor(${a} ÷ 2) = ${Math.floor(a/2)}`;
-  document.getElementById('op-explain').textContent = explain;
-}
-
-function renderTruthTable(){
-  const container = document.getElementById('truth-wrap');
-  if(currentOp==='AND'||currentOp==='OR'||currentOp==='XOR'){
-    container.innerHTML = `<table class="truth-table">
-      <thead><tr><th>A</th><th>B</th><th>${currentOp} (A, B)</th></tr></thead>
-      <tbody>
-        ${[[0,0],[0,1],[1,0],[1,1]].map(([a,b])=>{
-          let r = currentOp==='AND'?a&b:currentOp==='OR'?a|b:a^b;
-          return `<tr><td class="${a?'c1':'r0'}">${a}</td><td class="${b?'c1':'r0'}">${b}</td><td class="${r?'g1':'r0'}">${r}</td></tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
-  } else if(currentOp==='NOT'){
-    container.innerHTML = `<table class="truth-table">
-      <thead><tr><th>A</th><th>NOT A</th></tr></thead>
-      <tbody>
-        <tr><td class="r0">0</td><td class="g1">1</td></tr>
-        <tr><td class="c1">1</td><td class="r0">0</td></tr>
-      </tbody>
-    </table>`;
-  } else {
-    container.innerHTML = `<div class="step-box">Shift tidak memiliki tabel kebenaran konvensional.<br>Lihat visualisasi di atas untuk melihat efek bit shift.</div>`;
-  }
-}
-
-// ==============================
-// ASCII
-// ==============================
-function encodeText(){
-  const txt = document.getElementById('ascii-input').value;
-  const out = document.getElementById('bin-text-output');
-  if(!txt){ out.innerHTML='—';
-    document.getElementById('asc-chars').textContent='0';
-    document.getElementById('asc-bytes').textContent='0';
-    document.getElementById('asc-bits').textContent='0'; return;
-  }
-  let html='';
-  txt.split('').forEach(ch=>{
-    const code = ch.charCodeAt(0);
-    const bin = code.toString(2).padStart(8,'0');
-    html += `<span class="text-bin-char">${ch}</span><span class="text-bin-sep"> = </span><span class="text-bin-bits">${bin}</span><span class="text-bin-sep">  </span>`;
-  });
-  out.innerHTML = html;
-  document.getElementById('asc-chars').textContent = txt.length;
-  document.getElementById('asc-bytes').textContent = txt.length;
-  document.getElementById('asc-bits').textContent = txt.length * 8;
-}
-
-function copyBinText(){
-  const txt = document.getElementById('ascii-input').value;
-  if(!txt){ showToast('Ketik teks dulu!'); return; }
-  const bin = txt.split('').map(c=>c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
-  navigator.clipboard.writeText(bin).then(()=>showToast('Binary text copied!')).catch(()=>showToast('Copy gagal'));
-}
-
-function initAsciiTable(){
-  const grid = document.getElementById('ascii-table');
-  grid.innerHTML='';
-  for(let i=32;i<=126;i++){
-    const ch = String.fromCharCode(i);
-    const bin = i.toString(2).padStart(8,'0');
-    const cell = document.createElement('div');
-    cell.className='ascii-cell';
-    cell.innerHTML = `<div class="ascii-char">${ch==='<'?'&lt;':ch==='>'?'&gt;':ch==='&'?'&amp;':ch}</div><div class="ascii-dec">dec:${i} hex:${i.toString(16).toUpperCase()}</div><div class="ascii-bin">${bin}</div>`;
-    cell.onclick=()=>{
-      document.querySelectorAll('.ascii-cell').forEach(c=>c.classList.remove('selected'));
-      cell.classList.add('selected');
-      setBitsFromVal(i);
-      showTab('t1');
-      showToast(`'${ch}' = ${i} = ${bin}`,'green');
-    };
-    grid.appendChild(cell);
-  }
-}
-
-// ==============================
-// QUIZ
-// ==============================
-let curQuizData = null;
-
-function setQuizLevel(l){
-  quizLevel=l;
-  ['easy','med','hard'].forEach(x=>document.getElementById('lvl-'+x).classList.remove('active'));
-  document.getElementById('lvl-'+l).classList.add('active');
-  nextQuestion();
-}
-
-function setQuizMode(m){
-  quizMode=m;
-  ['b2d','d2b','mix'].forEach(x=>document.getElementById('mode-'+x).classList.remove('active'));
-  document.getElementById('mode-'+m).classList.add('active');
-  nextQuestion();
-}
-
-function getRandN(){
-  if(quizLevel==='easy') return Math.floor(Math.random()*16);
-  if(quizLevel==='med') return Math.floor(Math.random()*64);
-  return Math.floor(Math.random()*256);
-}
-
-function nextQuestion(){
-  qAnswered=false;
-  document.getElementById('next-q-btn').style.display='none';
-  document.getElementById('quiz-fb').className='quiz-feedback';
-  const n = getRandN();
-  const doB2D = quizMode==='mix' ? Math.random()>0.5 : quizMode==='b2d';
-  curQuizData = { n, type: doB2D?'b2d':'d2b' };
-  const binStr = n.toString(2).padStart(8,'0');
-  const qEl = document.getElementById('quiz-q');
-  if(doB2D){
-    qEl.innerHTML = `Berapa nilai <strong>desimal</strong> dari bilangan biner ini?<span class="q-code">${binStr}</span>`;
-  } else {
-    qEl.innerHTML = `Angka desimal <strong>${n}</strong>, representasi binernya adalah?<span class="q-code" style="font-size:20px;letter-spacing:0.05em">${n}</span>`;
-  }
-  let choices = [];
-  if(doB2D){
-    choices=[n]; while(choices.length<4){ let r=n+Math.floor(Math.random()*30)-15; r=Math.max(0,Math.min(255,r)); if(!choices.includes(r)) choices.push(r); }
-    choices=choices.sort(()=>Math.random()-0.5);
-  } else {
-    const correct=binStr;
-    choices=[correct];
-    while(choices.length<4){
-      let r=(n+Math.floor(Math.random()*20)-10);
-      r=Math.max(0,Math.min(255,r));
-      const rb=r.toString(2).padStart(8,'0');
-      if(!choices.includes(rb)) choices.push(rb);
-    }
-    choices=choices.sort(()=>Math.random()-0.5);
-  }
-  const opts=document.getElementById('quiz-opts'); opts.innerHTML='';
-  choices.forEach(c=>{
-    const btn=document.createElement('button'); btn.className='quiz-opt';
-    btn.textContent=doB2D?c:c;
-    btn.onclick=()=>checkAnswer(c,btn);
-    opts.appendChild(btn);
-  });
-}
-
-function checkAnswer(chosen, btn){
-  if(qAnswered) return;
-  qAnswered=true; qTotal++;
-  const {n,type} = curQuizData;
-  const correct = type==='b2d' ? n : n.toString(2).padStart(8,'0');
-  const isRight = String(chosen)===String(correct);
-  if(isRight){ qScore++; qStreak++; btn.className='quiz-opt correct'; }
-  else {
-    qStreak=0; btn.className='quiz-opt wrong';
-    document.querySelectorAll('.quiz-opt').forEach(b=>{ if(String(b.textContent)===String(correct)) b.className='quiz-opt revealed'; });
-  }
-  const fb=document.getElementById('quiz-fb');
-  fb.textContent = isRight ? `BENAR! ${n} dalam biner = ${n.toString(2).padStart(8,'0')} | Desimal = ${n}` : `Jawaban benar: ${correct}`;
-  fb.className='quiz-feedback show '+(isRight?'ok':'no');
-  document.getElementById('quiz-fb').className='quiz-feedback show '+(isRight?'ok':'no');
-  document.getElementById('q-score').textContent=qScore;
-  document.getElementById('q-total').textContent=qTotal;
-  document.getElementById('streak-badge').textContent=`🔥 STREAK: ${qStreak}`;
-  document.getElementById('next-q-btn').style.display='inline-block';
-  updateScoreUI();
-  document.getElementById('session-score').textContent=`SCORE: ${qScore}`;
-}
-
-function updateScoreUI(){
-  const pct = qTotal>0 ? Math.round(qScore/qTotal*100) : 0;
-  document.getElementById('score-bar').style.width=pct+'%';
-  const circumference=207.3;
-  document.getElementById('ring-fill').style.strokeDashoffset=circumference-(circumference*pct/100);
-  document.getElementById('ring-pct').textContent=pct+'%';
-}
-
-function resetQuiz(){
-  qScore=0; qTotal=0; qStreak=0;
-  document.getElementById('q-score').textContent='0';
-  document.getElementById('q-total').textContent='0';
-  document.getElementById('streak-badge').textContent='🔥 STREAK: 0';
-  document.getElementById('session-score').textContent='SCORE: 0';
-  updateScoreUI(); nextQuestion();
-  showToast('SKOR DIRESET');
-}
-
-// ==============================
-// CHEATSHEET & POWERS
-// ==============================
-function initCheatsheet(){
-  const grid = document.getElementById('pow-grid');
-  [0,1,2,3,4,5,6,7,8,9,10,16,32].forEach(e=>{
-    const card=document.createElement('div'); card.className='pow-card';
-    card.innerHTML=`<div class="p-exp">2<sup>${e}</sup></div><div class="p-val">${Math.pow(2,e).toLocaleString()}</div>`;
-    grid.appendChild(card);
-  });
-
-  const notes={0:'(basis)',8:'(1 byte)',16:'(2 bytes)',32:'(4 bytes)'};
-  const table=document.getElementById('cheat-table');
-  table.innerHTML=`<thead><tr><th>DESIMAL</th><th>BINER</th><th>HEX</th><th>KETERANGAN</th></tr></thead><tbody></tbody>`;
-  const tbody=table.querySelector('tbody');
-  for(let i=0;i<=31;i++){
-    const tr=document.createElement('tr');
-    const note=notes[i]||'';
-    tr.innerHTML=`<td class="td-dec">${i}</td><td class="td-bin">${i.toString(2).padStart(8,'0')}</td><td class="td-hex">${i.toString(16).toUpperCase().padStart(2,'0')}</td><td class="td-note">${note}</td>`;
-    tbody.appendChild(tr);
-  }
-}
-
-// ==============================
-// TOAST NOTIFICATION
-// ==============================
-let toastTimer;
-function showToast(msg, type=''){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast show '+(type||'');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.className='toast',2500);
-}
-
-// ==============================
-// INIT
-// ==============================
-initBitSim();
-initAsciiTable();
-initCheatsheet();
-setOp('AND');
-encodeText();
-nextQuestion();
-</script>
+<script src="script.js"></script>
 </body>
 </html>
