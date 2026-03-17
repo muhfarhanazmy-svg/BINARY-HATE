@@ -3,273 +3,235 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Binary Lab — Perpustakaan Roh Hutan</title>
+  <title>Binary Lab</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- ===================== ANIMATED BACKGROUND ===================== -->
-<div class="scene-bg">
-  <div class="scene-sky"></div>
-  <div class="hill hill-1"></div>
-  <div class="hill hill-2"></div>
-  <div class="hill hill-3"></div>
-  <div id="spirits-bg"></div>
-</div>
-
 <div class="app">
 
-  <!-- ===================== HEADER ===================== -->
+  <!-- HEADER -->
   <div class="header">
-    <p class="header-eyebrow">✦ Perpustakaan Digital Roh Hutan ✦</p>
-    <h1>Binary <em>Lab</em></h1>
-    <p class="header-sub">Pelajari kode biner bersama roh-roh hutan yang menyimpan rahasia angka</p>
-    <div class="header-pills">
-      <span class="pill green">Sistem Online</span>
-      <span class="pill">Basis-2</span>
-      <span class="pill">8-bit Mode</span>
-      <span class="pill" id="header-score">Jiwa terkumpul: 0</span>
+    <p class="header-eyebrow">Binary Lab</p>
+    <h1>Belajar Kode <span>Biner</span></h1>
+    <p class="header-sub">Simulator interaktif untuk konversi, operasi bitwise, dan kuis</p>
+    <div class="header-meta">
+      <span class="meta-chip green">● Online</span>
+      <span class="meta-chip">8-bit</span>
+      <span class="meta-chip">Basis-2</span>
+      <span class="meta-chip" id="header-chip">Jiwa: <span id="header-score">0</span></span>
     </div>
   </div>
 
-  <!-- ===================== NAV TABS ===================== -->
-  <div class="nav-tabs">
-    <button class="tab-btn active" onclick="showTab('t1')">
-      <span class="ch-num">Bab I</span>Konverter
-    </button>
-    <button class="tab-btn" onclick="showTab('t2')">
-      <span class="ch-num">Bab II</span>Operasi Bitwise
-    </button>
-    <button class="tab-btn" onclick="showTab('t3')">
-      <span class="ch-num">Bab III</span>Kuis
-    </button>
-    <button class="tab-btn" onclick="showTab('t4')">
-      <span class="ch-num">Bab IV</span>Referensi
-    </button>
+  <!-- NAV -->
+  <div class="nav-wrap">
+    <button class="tab-btn active" onclick="showTab('t1')">Konverter</button>
+    <button class="tab-btn"        onclick="showTab('t2')">Operasi</button>
+    <button class="tab-btn"        onclick="showTab('t3')">Kuis</button>
+    <button class="tab-btn"        onclick="showTab('t4')">Referensi</button>
   </div>
 
-  <div class="panel">
+  <div class="content">
 
-    <!-- ===================== TAB 1: KONVERTER ===================== -->
+    <!-- ══ TAB 1: KONVERTER ══ -->
     <div class="section active" id="t1">
-      <div class="sec-title"><span class="leaf">🌿</span> Simulator Roh Biner</div>
-      <div class="sec-desc">
-        Klik roh-roh di bawah untuk membangunkan (1) atau menidurkan (0) mereka.
-        Roh yang terjaga bersinar emas — nilai mereka dijumlahkan secara otomatis.
-        Coba drag-klik untuk toggle banyak roh sekaligus!
-      </div>
 
-      <div id="bit-container" class="bit-container"></div>
-
-      <div class="result-grid">
-        <div class="result-card">
-          <div class="result-label">Biner</div>
-          <div class="result-value sm" id="r-bin">00000000</div>
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-title">Bit Simulator</div>
+          <div class="sec-sub">Klik bit untuk toggle. Drag untuk toggle banyak sekaligus.</div>
         </div>
-        <div class="result-card">
-          <div class="result-label">Desimal</div>
-          <div class="result-value" id="r-dec">0</div>
+        <div id="bit-container" class="bit-container"></div>
+        <div class="stat-row">
+          <div class="stat-cell"><div class="stat-label">Biner</div><div class="stat-val sm" id="r-bin">00000000</div></div>
+          <div class="stat-cell"><div class="stat-label">Desimal</div><div class="stat-val" id="r-dec">0</div></div>
+          <div class="stat-cell"><div class="stat-label">Hex</div><div class="stat-val blue" id="r-hex">0x00</div></div>
+          <div class="stat-cell"><div class="stat-label">Octal</div><div class="stat-val amber" id="r-oct">0o000</div></div>
         </div>
-        <div class="result-card">
-          <div class="result-label">Heksadesimal</div>
-          <div class="result-value sky" id="r-hex">0x00</div>
-        </div>
-        <div class="result-card">
-          <div class="result-label">Oktal</div>
-          <div class="result-value earth" id="r-oct">0o000</div>
+        <div class="step-box" id="r-step">Klik bit di atas untuk mulai — bit aktif dijumlahkan.</div>
+        <div class="btn-row">
+          <button class="btn"         onclick="resetBits()">Reset</button>
+          <button class="btn primary" onclick="randomBits()">Random</button>
+          <button class="btn ghost"   onclick="setVal(255)">All 1s</button>
         </div>
       </div>
 
-      <div class="scroll-box" id="r-step">
-        Bangunkan roh-roh di atas untuk melihat nilai mereka bergabung...
-      </div>
-
-      <div class="btn-row">
-        <button class="btn"       onclick="resetBits()">Tidurkan Semua</button>
-        <button class="btn sky"   onclick="randomBits()">Acak Roh</button>
-        <button class="btn earth" onclick="setBitsFromVal(255)">Bangunkan Semua</button>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="sec-title"><span class="leaf">🌾</span> Konverter Angka</div>
-      <div class="sec-desc">
-        Ketik angka desimal (0–255) untuk melihat konversi step-by-step, atau ketik biner langsung.
-      </div>
-
-      <div class="input-row">
-        <div class="input-group">
-          <div class="input-label">Masukkan Desimal</div>
-          <input type="number" class="input-field" id="d2b-input"
-            min="0" max="255" placeholder="contoh: 42" oninput="d2bConvert()">
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-title">Konverter</div>
+          <div class="sec-sub">Ketik angka desimal atau biner — lihat konversi step-by-step.</div>
         </div>
-        <div class="input-group">
-          <div class="input-label">Atau Masukkan Biner</div>
-          <input type="text" class="input-field" id="b2d-input"
-            placeholder="contoh: 101010" oninput="b2dConvert()" maxlength="8">
+        <div class="input-grid">
+          <div>
+            <div class="label">Desimal (0–255)</div>
+            <input type="number" class="input-field" id="d2b-input" min="0" max="255" placeholder="42" oninput="d2bConvert()">
+          </div>
+          <div>
+            <div class="label">Biner</div>
+            <input type="text" class="input-field" id="b2d-input" placeholder="00101010" maxlength="8" oninput="b2dConvert()">
+          </div>
         </div>
+        <div class="stat-row" id="conv2-results" style="display:none"></div>
+        <div class="step-box blue" id="d2b-steps">Ketik angka di atas untuk melihat cara kerjanya...</div>
       </div>
 
-      <div class="result-grid" id="conv2-results" style="display:none"></div>
-      <div class="scroll-box sky" id="d2b-steps">Ketik angka di atas untuk melihat langkah-langkah konversi...</div>
     </div>
 
-    <!-- ===================== TAB 2: OPERASI BITWISE ===================== -->
+    <!-- ══ TAB 2: OPERASI ══ -->
     <div class="section" id="t2">
-      <div class="sec-title"><span class="leaf">⚡</span> Operasi Bitwise</div>
-      <div class="sec-desc">
-        Operasi fundamental yang dipakai CPU setiap milidetik. Pelajari cara roh-roh biner
-        berinteraksi satu sama lain.
-      </div>
 
-      <div class="op-selector">
-        <button class="op-btn active"  onclick="setOp('AND')">AND</button>
-        <button class="op-btn sky"     onclick="setOp('OR')">OR</button>
-        <button class="op-btn earth"   onclick="setOp('XOR')">XOR</button>
-        <button class="op-btn red"     onclick="setOp('NOT')">NOT</button>
-        <button class="op-btn"         onclick="setOp('SHL')">Shift ←</button>
-        <button class="op-btn"         onclick="setOp('SHR')">Shift →</button>
-      </div>
-
-      <div class="lore-block" id="op-info">
-        <strong>AND</strong> — Output 1 hanya jika <strong>kedua</strong> bit = 1.
-        Dipakai untuk masking bit. Contoh: <code>1100 AND 1010 = 1000</code>
-      </div>
-
-      <div class="two-col">
-        <div>
-          <div style="margin-bottom:16px">
-            <div class="input-label">Input A</div>
-            <input type="text" class="input-field" id="op-a"
-              placeholder="00001111" maxlength="8" oninput="calcOp()" value="11001010">
-          </div>
-          <div id="op-b-wrap">
-            <div class="input-label">Input B</div>
-            <input type="text" class="input-field" id="op-b"
-              placeholder="11110000" maxlength="8" oninput="calcOp()" value="10110011">
-          </div>
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-title">Operasi Bitwise</div>
+          <div class="sec-sub">AND, OR, XOR, NOT, dan Bit Shift — operasi fundamental CPU setiap milidetik.</div>
         </div>
-        <div>
-          <div class="op-display" id="op-display"></div>
+
+        <div class="op-tabs">
+          <button class="op-tab active" onclick="setOp('AND')">AND</button>
+          <button class="op-tab"        onclick="setOp('OR')">OR</button>
+          <button class="op-tab"        onclick="setOp('XOR')">XOR</button>
+          <button class="op-tab"        onclick="setOp('NOT')">NOT</button>
+          <button class="op-tab"        onclick="setOp('SHL')">SHL «</button>
+          <button class="op-tab"        onclick="setOp('SHR')">SHR »</button>
         </div>
+
+        <div class="info-box" id="op-info" style="border-left-color:var(--accent)">
+          <strong>AND</strong> — Output <code>1</code> hanya jika kedua bit = 1. Buat masking. Contoh: <code>1100 AND 1010 = 1000</code>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div>
+            <div style="margin-bottom:12px">
+              <div class="label">Input A</div>
+              <input type="text" class="input-field" id="op-a" placeholder="11001010" maxlength="8" oninput="calcOp()" value="11001010">
+            </div>
+            <div id="op-b-wrap">
+              <div class="label">Input B</div>
+              <input type="text" class="input-field" id="op-b" placeholder="10110011" maxlength="8" oninput="calcOp()" value="10110011">
+            </div>
+          </div>
+          <div class="op-visual" id="op-visual"></div>
+        </div>
+
+        <div class="step-box" id="op-exp"></div>
       </div>
 
-      <div class="scroll-box" id="op-explain"></div>
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:16px">Tabel Kebenaran</div>
+        <div id="truth-wrap"></div>
+      </div>
 
-      <div class="divider"></div>
-
-      <div class="sec-title"><span class="leaf">📜</span> Tabel Kebenaran</div>
-      <div id="truth-wrap"></div>
     </div>
 
-    <!-- ===================== TAB 3: KUIS ===================== -->
+    <!-- ══ TAB 3: KUIS ══ -->
     <div class="section" id="t3">
-      <div class="sec-title"><span class="leaf">🌟</span> Tantangan Roh</div>
-      <div class="sec-desc">
-        Kumpulkan jiwa dengan menjawab pertanyaan dengan benar.
-        Jaga streak-mu agar kekuatan roh tetap membara!
-      </div>
 
-      <!-- Score panel -->
-      <div class="score-wrap">
-        <svg class="score-ring" width="80" height="80" viewBox="0 0 80 80">
-          <circle class="ring-track" cx="40" cy="40" r="33"/>
-          <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="33"
-            stroke-dasharray="207.3" stroke-dashoffset="207.3"/>
-          <text class="ring-center" x="40" y="37" id="ring-pct">0%</text>
-          <text class="ring-sub"    x="40" y="52">akurasi</text>
-        </svg>
-        <div style="flex:1; display:flex; flex-direction:column; gap:10px; justify-content:center;">
-          <div style="display:flex; align-items:baseline; gap:6px;">
-            <div class="score-nums"><span class="s-big" id="q-score">0</span> / <span id="q-total">0</span></div>
-            <div style="font-family:var(--body);font-size:11px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase">benar / total</div>
+      <!-- Score -->
+      <div class="card card-sm">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <svg width="64" height="64" viewBox="0 0 80 80">
+            <circle class="ring-track" cx="40" cy="40" r="33" fill="none" stroke="var(--bg3)" stroke-width="6"/>
+            <circle class="ring-fill" id="ring-fill" cx="40" cy="40" r="33" fill="none" stroke="var(--accent)"
+              stroke-width="6" stroke-linecap="round" stroke-dasharray="207.3" stroke-dashoffset="207.3"
+              style="transform:rotate(-90deg);transform-origin:center;transition:stroke-dashoffset .5s ease"/>
+            <text id="ring-pct" x="40" y="44" text-anchor="middle"
+              style="font-family:var(--mono);font-size:13px;font-weight:600;fill:var(--accent)">0%</text>
+          </svg>
+          <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+              <div style="font-size:13px;color:var(--text2)">
+                <span class="big" id="q-score" style="font-size:28px;font-weight:700;color:var(--accent)">0</span>
+                &nbsp;/&nbsp;<span id="q-total">0</span>
+              </div>
+              <span class="streak" id="streak">🔥 Streak 0</span>
+            </div>
+            <div class="prog-outer"><div class="prog-inner" id="prog-inner" style="width:0%"></div></div>
           </div>
-          <div class="score-bar-outer"><div class="score-bar-inner" id="score-bar" style="width:0%"></div></div>
-          <div class="streak-badge" id="streak-badge">✦ Streak: 0</div>
         </div>
       </div>
 
       <!-- Level & Mode -->
-      <div style="display:flex; gap:14px; align-items:flex-start; margin-bottom:22px; flex-wrap:wrap;">
-        <div>
-          <div class="input-label" style="margin-bottom:8px">Level kesulitan</div>
-          <div class="level-btns">
-            <button class="lvl-btn active" id="lvl-easy" onclick="setQuizLevel('easy')">Mudah (0–15)</button>
-            <button class="lvl-btn"        id="lvl-med"  onclick="setQuizLevel('med')">Sedang (0–63)</button>
-            <button class="lvl-btn"        id="lvl-hard" onclick="setQuizLevel('hard')">Susah (0–255)</button>
+      <div class="card card-sm">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <div class="label" style="margin-bottom:8px">Level</div>
+            <div class="lvl-row">
+              <button class="lvl-btn active" id="lvl-easy" onclick="setLevel('easy')">Mudah (0–15)</button>
+              <button class="lvl-btn"        id="lvl-med"  onclick="setLevel('med')">Sedang (0–63)</button>
+              <button class="lvl-btn"        id="lvl-hard" onclick="setLevel('hard')">Susah (0–255)</button>
+            </div>
           </div>
-        </div>
-        <div>
-          <div class="input-label" style="margin-bottom:8px">Mode soal</div>
-          <div class="level-btns">
-            <button class="lvl-btn active" id="mode-b2d" onclick="setQuizMode('b2d')">Bin → Dec</button>
-            <button class="lvl-btn"        id="mode-d2b" onclick="setQuizMode('d2b')">Dec → Bin</button>
-            <button class="lvl-btn"        id="mode-mix" onclick="setQuizMode('mix')">Campur</button>
+          <div>
+            <div class="label" style="margin-bottom:8px">Mode</div>
+            <div class="lvl-row">
+              <button class="lvl-btn active" id="mode-b2d" onclick="setMode('b2d')">Bin → Dec</button>
+              <button class="lvl-btn"        id="mode-d2b" onclick="setMode('d2b')">Dec → Bin</button>
+              <button class="lvl-btn"        id="mode-mix" onclick="setMode('mix')">Campur</button>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Question -->
-      <div class="quiz-q-card">
-        <div class="quiz-label" id="quiz-label">✦ Baca Roh Biner</div>
-        <div class="quiz-question-text" id="quiz-q"></div>
+      <div class="quiz-card">
+        <div class="quiz-eyebrow" id="quiz-eyebrow">Biner → Desimal</div>
+        <div class="quiz-q-text" id="quiz-q-text"></div>
       </div>
 
       <div class="quiz-opts" id="quiz-opts"></div>
-      <div class="quiz-feedback" id="quiz-fb"></div>
-
-      <div class="btn-row" style="margin-top:16px">
-        <button class="btn sky" id="next-q-btn" onclick="nextQuestion()" style="display:none">
-          Soal Berikutnya →
-        </button>
-        <button class="btn earth" onclick="resetQuiz()">Mulai Ulang</button>
+      <div class="quiz-fb"   id="quiz-fb"></div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn primary" id="next-btn" onclick="nextQ()" style="display:none">Lanjut →</button>
+        <button class="btn ghost"   onclick="resetQuiz()">Reset Skor</button>
       </div>
+
     </div>
 
-    <!-- ===================== TAB 4: REFERENSI ===================== -->
+    <!-- ══ TAB 4: REFERENSI ══ -->
     <div class="section" id="t4">
-      <div class="sec-title"><span class="leaf">📖</span> Pangkat Dua Penting</div>
-      <div class="pow-grid" id="pow-grid"></div>
 
-      <div class="divider"></div>
-
-      <div class="sec-title"><span class="leaf">📋</span> Tabel Referensi 0–31</div>
-      <div style="overflow-x:auto; margin-bottom:24px;">
-        <table class="cheat-table" id="cheat-table"></table>
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:14px">Pangkat 2</div>
+        <div class="pow-grid" id="pow-grid"></div>
       </div>
 
-      <div class="divider"></div>
-
-      <div class="sec-title"><span class="leaf">✨</span> Tips Cepat Hutan</div>
-      <div style="margin-bottom:16px; display:flex; flex-wrap:wrap; gap:6px;">
-        <span class="tip-tag green">bit terakhir 1 = ganjil</span>
-        <span class="tip-tag green">bit terakhir 0 = genap</span>
-        <span class="tip-tag sky">SHL = ×2</span>
-        <span class="tip-tag sky">SHR = ÷2</span>
-        <span class="tip-tag earth">4 bit = 1 nibble</span>
-        <span class="tip-tag earth">8 bit = 1 byte</span>
-        <span class="tip-tag green">NOT = flip semua bit</span>
-        <span class="tip-tag sky">0xFF = 255</span>
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:14px">Tabel 0–31</div>
+        <div style="overflow-x:auto">
+          <table class="ref-table" id="ref-table"></table>
+        </div>
       </div>
 
-      <div class="lore-block">
-        <strong>Hafalan Cepat:</strong> Pangkat 2 selalu dimulai dengan 1 dan diikuti 0-0-0…
-        Jadi <code>2⁵</code> = <code>100000</code>. Jumlah digit biner = eksponen + 1. Mudah kan?
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:12px">Tips Cepat</div>
+        <div class="tag-row">
+          <span class="tag green">bit terakhir 1 = ganjil</span>
+          <span class="tag green">bit terakhir 0 = genap</span>
+          <span class="tag blue">SHL = ×2</span>
+          <span class="tag blue">SHR = ÷2</span>
+          <span class="tag amber">4 bit = 1 nibble</span>
+          <span class="tag amber">8 bit = 1 byte</span>
+          <span class="tag green">NOT = flip semua</span>
+          <span class="tag blue">0xFF = 255</span>
+        </div>
+        <div class="divider"></div>
+        <div class="info-box">
+          <strong>Hafalan cepat:</strong> Pangkat 2 selalu diawali 1 lalu diikuti 0:
+          <code>1, 10, 100, 1000...</code> Jumlah digit = eksponen + 1.
+        </div>
+        <div class="info-box">
+          <strong>Two's Complement:</strong> Cara komputer simpan negatif.
+          Flip semua bit (NOT) + 1. Contoh: <code>-5</code> = NOT(<code>00000101</code>) + 1 = <code>11111011</code>
+        </div>
+        <div class="info-box">
+          <strong>Sign Bit:</strong> Bit paling kiri = tanda.
+          <code>0</code> = positif, <code>1</code> = negatif dalam sistem signed integer.
+        </div>
       </div>
-      <div class="lore-block">
-        <strong>Sign Bit:</strong> Bit paling kiri jadi tanda dalam sistem <em>signed</em>.
-        <code>0</code> = positif, <code>1</code> = negatif.
-        Contoh: <code>10000001</code> = -127 (two's complement).
-      </div>
-      <div class="lore-block">
-        <strong>Two's Complement:</strong> Cara komputer simpan negatif.
-        Flip semua bit (NOT) lalu tambah 1.
-        Contoh: <code>-5</code> = NOT(<code>00000101</code>) + 1 = <code>11111011</code>
-      </div>
+
     </div>
 
-  </div><!-- end .panel -->
-</div><!-- end .app -->
+  </div><!-- .content -->
+</div><!-- .app -->
 
 <div class="toast" id="toast"></div>
 <script src="script.js"></script>
